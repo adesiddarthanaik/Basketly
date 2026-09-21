@@ -86,8 +86,8 @@ function Payment({ onBack, onSuccess }) {
                 key: keyId,
                 amount: razorpayOrder.amount,
                 currency: razorpayOrder.currency,
-                name: "QuikBUY Coffee",
-                description: "Specialty coffee order payment",
+                name: "Basketly",
+                description: "Basketly Order Payment",
                 order_id: razorpayOrder.id,
                 handler: async (paymentResponse) => {
                     await api.post("/payment/verify", {
@@ -182,7 +182,7 @@ function Payment({ onBack, onSuccess }) {
                                                     <h2 className="text-lg font-semibold text-slate-900">
                                                         {item.product?.name || "Product"}
                                                     </h2>
-                                                    <p className="text-sm text-slate-600">{item.product?.brand || "QuikBUY Coffee"}</p>
+                                                    <p className="text-sm text-slate-600">{item.product?.brand || "Basketly"}</p>
                                                 </div>
                                                 <p className="text-lg font-semibold text-slate-900">
                                                     ₹{Number(item.product?.priceAtPurchase ?? item.product?.price ?? 0).toLocaleString()}

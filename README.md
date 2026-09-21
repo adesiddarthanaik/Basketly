@@ -1,4 +1,4 @@
-# QuikBUY Coffee - Full-Stack E-Commerce Platform
+# Basketly - Full-Stack E-Commerce Platform
 
 A production-grade full-stack e-commerce web application built with **React 19**, **Node.js**, **Express 5**, **MongoDB**, and **Razorpay Payment Integration**.
 
@@ -7,8 +7,8 @@ A production-grade full-stack e-commerce web application built with **React 19**
 ## 🚀 Features
 
 - 🔐 **Authentication & Authorization**: Secure JWT-based authentication with bcrypt password hashing and role-based access control (`user` vs `admin`).
-- ☕ **Catalog & Discovery**: Multi-field partial substring search across names, brands, categories, and descriptions with ReDoS-safe input sanitization.
-- 🎛️ **Filtering & Sorting**: Real-time category filtering (Roasted Beans, Cold Brew, Instant, Espresso), price sorting (Low-to-High, High-to-Low, Newest), and stock availability toggle.
+- 🛍️ **Catalog & Discovery**: Multi-field partial substring search across names, brands, categories, and descriptions with ReDoS-safe input sanitization.
+- 🎛️ **Filtering & Sorting**: Real-time category filtering (Electronics, Clothing, Footwear, Home & Kitchen, etc.), price sorting (Low-to-High, High-to-Low, Newest), and stock availability toggle.
 - 🛒 **Smart Shopping Cart**: Real-time inventory bounds validation preventing over-ordering beyond available warehouse stock.
 - 💳 **Razorpay Payment Gateway**: Seamless checkout modal with cryptographic HMAC-SHA256 signature verification and automatic stock deduction upon payment completion.
 - 📦 **Order Tracking**: Visual step-progress timeline (`Placed` → `Paid` → `Shipped` → `Delivered`) and order history.
@@ -40,7 +40,7 @@ A production-grade full-stack e-commerce web application built with **React 19**
 ## 📁 Project Structure
 
 ```
-quickBuyCoffee/
+Basketly/
 ├── backend/
 │   ├── app.js                 # Express server entry point
 │   ├── createAdmin.js         # Admin bootstrapping script
@@ -163,7 +163,7 @@ quickBuyCoffee/
 | `POST` | `/auth/login` | Public | Login and receive JWT |
 | `GET` | `/auth/me` | User | Get current user profile |
 | `GET` | `/products` | Public | Search, filter, sort & paginate products |
-| `POST` | `/products/addProduct` | Admin | Create a new coffee product |
+| `POST` | `/products/addProduct` | Admin | Create a new product |
 | `GET` | `/cart` | User | Get current user's cart |
 | `POST` | `/cart/add` | User | Add item to cart (with stock checks) |
 | `POST` | `/cart/remove` | User | Decrement or remove item from cart |

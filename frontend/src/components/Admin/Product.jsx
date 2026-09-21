@@ -6,20 +6,20 @@ const initialForm = {
   price: "",
   image: "",
   brand: "",
-  category: "Roasted Beans",
+  category: "Electronics",
   countInStock: "",
   description: "",
 };
 
-const coffeeCategories = [
-  "Roasted Beans",
-  "Instant Coffee",
-  "Cold Brew",
-  "Espresso",
-  "Drip Brew",
-  "French Press",
-  "Pour Over",
-  "Moka Pot",
+const productCategories = [
+  "Electronics",
+  "Clothing",
+  "Footwear",
+  "Home & Kitchen",
+  "Accessories",
+  "Grocery",
+  "Beauty & Personal Care",
+  "Other",
 ];
 
 function Product() {
@@ -64,7 +64,7 @@ function Product() {
 		<div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
 			<h2 className="text-2xl font-semibold text-slate-900">Add Product</h2>
 			<p className="mt-2 text-sm text-slate-600">
-				Add coffee products for roasted beans, instant coffee, cold brew, and more.
+				Add new products to your Basketly catalog.
 			</p>
 			 <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="md:col-span-2">
@@ -75,7 +75,7 @@ function Product() {
             value={formData.name}
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
-            placeholder="Premium Arabica Coffee"
+            placeholder="e.g. Wireless Headphones / Oxford Shirt"
             required
           />
         </div>
@@ -126,7 +126,7 @@ function Product() {
             value={formData.brand}
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
-            placeholder="QuikBUY Coffee"
+            placeholder="Basketly"
             required
           />
         </div>
@@ -140,7 +140,7 @@ function Product() {
             className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
             required
           >
-            {coffeeCategories.map((category) => (
+            {productCategories.map((category) => (
               <option key={category} value={category}>
                 {category}
               </option>

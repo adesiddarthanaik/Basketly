@@ -1,16 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../../services/api";
 
-const coffeeCategories = [
+const productCategories = [
     "All",
-    "Roasted Beans",
-    "Instant Coffee",
-    "Cold Brew",
-    "Espresso",
-    "Drip Brew",
-    "French Press",
-    "Pour Over",
-    "Moka Pot",
+    "Electronics",
+    "Clothing",
+    "Footwear",
+    "Home & Kitchen",
+    "Accessories",
+    "Grocery",
+    "Beauty & Personal Care",
+    "Other",
 ];
 
 function Home() {
@@ -129,10 +129,10 @@ function Home() {
             <div className="mx-auto max-w-6xl space-y-6">
                 {/* Hero Header */}
                 <div className="rounded-3xl bg-slate-900 px-6 py-8 text-white shadow-lg shadow-slate-300/40">
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Artisan Coffee Collection</p>
-                    <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Discover Premium Roasts</h1>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Featured Collections</p>
+                    <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Discover Curated Products</h1>
                     <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                        Explore freshly harvested specialty coffee beans, cold brews, and artisanal espresso blends.
+                        Explore quality products, top-rated brands, and curated everyday essentials with Basketly.
                     </p>
 
                     {/* Search & Filter Controls Bar */}
@@ -140,7 +140,7 @@ function Home() {
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Search by coffee name or keyword..."
+                                placeholder="Search products, brands, or categories..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full rounded-2xl bg-white/10 px-4 py-3 text-sm text-white placeholder-slate-400 backdrop-blur outline-none ring-1 ring-white/20 transition focus:bg-white focus:text-slate-900 focus:ring-slate-900"
@@ -180,7 +180,7 @@ function Home() {
 
                 {/* Category Pills */}
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-                    {coffeeCategories.map((cat) => (
+                    {productCategories.map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
@@ -253,7 +253,7 @@ function Home() {
 
                 {!loading && products.length === 0 && (
                     <div className="rounded-3xl bg-white p-12 text-center shadow-sm ring-1 ring-slate-200">
-                        <p className="text-base font-semibold text-slate-900">No matching coffee products found</p>
+                        <p className="text-base font-semibold text-slate-900">No matching products found</p>
                         <p className="mt-1 text-sm text-slate-500">Try changing your search query or filter criteria.</p>
                         <button
                             onClick={() => {
@@ -296,7 +296,7 @@ function Home() {
 
                                         <div className="absolute left-3 top-3 flex gap-2">
                                             <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-900 backdrop-blur">
-                                                {product.category || "Coffee"}
+                                                {product.category || "General"}
                                             </span>
                                             {Number(product.countInStock ?? 0) <= 0 && (
                                                 <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
@@ -326,7 +326,7 @@ function Home() {
                                             <h2 className="text-lg font-semibold text-slate-900 group-hover:text-slate-700">
                                                 {product.name}
                                             </h2>
-                                            <p className="text-xs font-medium text-slate-500">{product.brand || "QuikBUY Coffee"}</p>
+                                            <p className="text-xs font-medium text-slate-500">{product.brand || "Basketly"}</p>
                                         </div>
 
                                         <div className="flex items-center justify-between">
@@ -349,7 +349,7 @@ function Home() {
                                         </div>
 
                                         <p className="line-clamp-2 text-xs leading-5 text-slate-600">
-                                            {product.description || "Fresh specialty coffee hand-roasted to perfection."}
+                                            {product.description || "Quality product delivered directly to your doorstep."}
                                         </p>
 
                                         {/* Expandable Cart Controller */}

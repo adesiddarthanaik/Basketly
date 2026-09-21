@@ -41,7 +41,7 @@ function Cart({ onCheckout }) {
                     <p className="text-sm uppercase tracking-[0.3em] text-slate-300">Your Cart</p>
                     <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Items ready for checkout</h1>
                     <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                        Review the coffee products you have added before placing an order.
+                        Review your items before placing an order.
                     </p>
                 </div>
 
@@ -83,7 +83,7 @@ function Cart({ onCheckout }) {
                                                 <h2 className="text-lg font-semibold text-slate-900">
                                                     {item.product?.name || "Product"}
                                                 </h2>
-                                                <p className="text-sm text-slate-600">{item.product?.brand || "QuikBUY Coffee"}</p>
+                                                <p className="text-sm text-slate-600">{item.product?.brand || "Basketly"}</p>
                                             </div>
                                             <p className="text-lg font-semibold text-slate-900">
                                                 ₹{Number(item.product?.priceAtPurchase ?? item.product?.price ?? 0).toLocaleString()}
@@ -93,7 +93,7 @@ function Cart({ onCheckout }) {
                                         <div className="flex flex-wrap gap-2 text-sm text-slate-600">
                                             <span className="rounded-full bg-slate-100 px-3 py-1">Qty: {item.quantity}</span>
                                             <span className="rounded-full bg-slate-100 px-3 py-1">
-                                                Category: {item.product?.category || "Coffee"}
+                                                Category: {item.product?.category || "General"}
                                             </span>
                                             <span className="rounded-full bg-slate-100 px-3 py-1">
                                                 Line total: ₹
