@@ -37,23 +37,57 @@ function Home() {
         currentPage: 1,
         pageSize: 9,
     });
-    const [wishlist, setWishlist] = useState(() => {
-        try {
-            return JSON.parse(localStorage.getItem("wishlist") || "[]");
-        } catch {
-            return [];
-        }
-    });
+    const [wishlist, setWishlist] = useState([]);
+    const [wishlistLoadingId, setWishlistLoadingId] = useState(null);
 
-    const toggleWishlist = (productId, e) => {
-        e.stopPropagation();
-        setWishlist((prev) => {
-            const next = prev.includes(productId)
-                ? prev.filter((id) => id !== productId)
-                : [...prev, productId];
-            localStorage.setItem("wishlist", JSON.stringify(next));
-            return next;
-        });
+    const loadWishlist = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const res = await api.get("/wishlist");
+            const wishlistData = res.data?.data || res.data;
+            const productList = wishlistData?.products || [];
+            const productIds = productList.map((p) => (typeof p === "object" && p !== null ? p._id : p));
+            setWishlist(productIds.filter(Boolean));
+        } catch {
+            setWishlist([]);
+        }
+    };
+
+    const toggleWishlist = async (productId, e) => {
+        e?.stopPropagation?.();
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setError("Please log in to manage your wishlist.");
+            return;
+        }
+
+        if (wishlistLoadingId === productId) return;
+        setWishlistLoadingId(productId);
+        setError("");
+
+        const isCurrentlyWishlisted = wishlist.includes(productId);
+
+        try {
+            if (isCurrentlyWishlisted) {
+                const res = await api.delete(`/wishlist/${productId}`);
+                const wishlistData = res.data?.data || res.data;
+                const productList = wishlistData?.products || [];
+                const productIds = productList.map((p) => (typeof p === "object" && p !== null ? p._id : p));
+                setWishlist(productIds.filter(Boolean));
+            } else {
+                const res = await api.post(`/wishlist/${productId}`);
+                const wishlistData = res.data?.data || res.data;
+                const productList = wishlistData?.products || [];
+                const productIds = productList.map((p) => (typeof p === "object" && p !== null ? p._id : p));
+                setWishlist(productIds.filter(Boolean));
+            }
+        } catch (err) {
+            setError(err.extractedMessage || err.response?.data?.message || "Could not update wishlist.");
+        } finally {
+            setWishlistLoadingId(null);
+        }
     };
 
     const loadCart = async () => {
@@ -112,6 +146,7 @@ function Home() {
 
     useEffect(() => {
         loadCart();
+        loadWishlist();
     }, []);
 
     const getCartQuantity = (productId) => {
@@ -401,12 +436,13 @@ function Home() {
                                         {/* Wishlist Heart Button */}
                                         <button
                                             type="button"
+                                            disabled={wishlistLoadingId === product._id}
                                             onClick={(e) => toggleWishlist(product._id, e)}
                                             className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition ${
                                                 isWishlisted
                                                     ? "bg-red-500 text-white shadow-md"
                                                     : "bg-white/80 text-slate-700 hover:bg-white"
-                                            }`}
+                                            } ${wishlistLoadingId === product._id ? "opacity-60 cursor-not-allowed" : ""}`}
                                             title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                                         >
                                             ♥

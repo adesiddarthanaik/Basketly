@@ -34,6 +34,7 @@ app.use('/products', require('./routes/products'));
 app.use('/orders', authMiddleware, require('./routes/orders'));
 app.use('/cart', authMiddleware, require('./routes/cart'));
 app.use('/payment', authMiddleware, require('./routes/payment'));
+app.use('/wishlist', authMiddleware, require('./routes/wishlist'));
 
 // Catch-all 404 handler
 app.use((req, res, next) => {
