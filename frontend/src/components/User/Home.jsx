@@ -22,11 +22,21 @@ function Home() {
     const [error, setError] = useState("");
     const [cartError, setCartError] = useState("");
 
-    // Filter, Search, and Sort state
+    // Filter, Search, Sort, and Pagination state
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [sortBy, setSortBy] = useState("newest");
     const [inStockOnly, setInStockOnly] = useState(false);
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+    const [page, setPage] = useState(1);
+    const [limit] = useState(9);
+    const [pagination, setPagination] = useState({
+        totalProducts: 0,
+        totalPages: 1,
+        currentPage: 1,
+        pageSize: 9,
+    });
     const [wishlist, setWishlist] = useState(() => {
         try {
             return JSON.parse(localStorage.getItem("wishlist") || "[]");
@@ -56,32 +66,49 @@ function Home() {
         }
     };
 
-    const fetchProducts = useCallback(async () => {
+    const fetchProducts = useCallback(async (targetPage = page) => {
         setLoading(true);
         setError("");
         try {
-            const params = {};
+            const params = {
+                page: targetPage,
+                limit,
+            };
             if (searchQuery.trim()) params.search = searchQuery.trim();
             if (selectedCategory !== "All") params.category = selectedCategory;
             if (sortBy) params.sortBy = sortBy;
             if (inStockOnly) params.inStock = true;
+            if (minPrice !== "" && !Number.isNaN(Number(minPrice))) {
+                params.minPrice = Number(minPrice);
+            }
+            if (maxPrice !== "" && !Number.isNaN(Number(maxPrice))) {
+                params.maxPrice = Number(maxPrice);
+            }
 
             const res = await api.get("/products", { params });
-            const productList = res.data?.data || res.data;
+            const productList = res.data?.data || [];
+            const paginationMeta = res.data?.pagination || {
+                totalProducts: productList.length,
+                totalPages: 1,
+                currentPage: targetPage,
+                pageSize: limit,
+            };
+
             setProducts(Array.isArray(productList) ? productList : []);
+            setPagination(paginationMeta);
         } catch (err) {
             setError(err.extractedMessage || err.response?.data?.message || "Could not load products.");
         } finally {
             setLoading(false);
         }
-    }, [searchQuery, selectedCategory, sortBy, inStockOnly]);
+    }, [searchQuery, selectedCategory, sortBy, inStockOnly, minPrice, maxPrice, limit, page]);
 
     useEffect(() => {
         const debounceTimer = setTimeout(() => {
-            fetchProducts();
+            fetchProducts(page);
         }, 250);
         return () => clearTimeout(debounceTimer);
-    }, [fetchProducts]);
+    }, [fetchProducts, page]);
 
     useEffect(() => {
         loadCart();
@@ -136,18 +163,24 @@ function Home() {
                     </p>
 
                     {/* Search & Filter Controls Bar */}
-                    <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-                        <div className="relative">
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="relative sm:col-span-2 lg:col-span-1">
                             <input
                                 type="text"
                                 placeholder="Search products, brands, or categories..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setPage(1);
+                                }}
                                 className="w-full rounded-2xl bg-white/10 px-4 py-3 text-sm text-white placeholder-slate-400 backdrop-blur outline-none ring-1 ring-white/20 transition focus:bg-white focus:text-slate-900 focus:ring-slate-900"
                             />
                             {searchQuery && (
                                 <button
-                                    onClick={() => setSearchQuery("")}
+                                    onClick={() => {
+                                        setSearchQuery("");
+                                        setPage(1);
+                                    }}
                                     className="absolute right-3 top-3 text-xs font-bold text-slate-400 hover:text-slate-700"
                                 >
                                     ✕
@@ -155,9 +188,40 @@ function Home() {
                             )}
                         </div>
 
+                        {/* Price Range Filter Inputs */}
+                        <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-800 px-3 py-2 text-xs text-white">
+                            <span className="font-medium text-slate-400">Price (₹):</span>
+                            <input
+                                type="number"
+                                placeholder="Min"
+                                value={minPrice}
+                                min="0"
+                                onChange={(e) => {
+                                    setMinPrice(e.target.value);
+                                    setPage(1);
+                                }}
+                                className="w-16 rounded-xl bg-white/10 px-2 py-1 text-center text-xs text-white placeholder-slate-500 outline-none focus:bg-white focus:text-slate-900"
+                            />
+                            <span className="text-slate-500">-</span>
+                            <input
+                                type="number"
+                                placeholder="Max"
+                                value={maxPrice}
+                                min="0"
+                                onChange={(e) => {
+                                    setMaxPrice(e.target.value);
+                                    setPage(1);
+                                }}
+                                className="w-16 rounded-xl bg-white/10 px-2 py-1 text-center text-xs text-white placeholder-slate-500 outline-none focus:bg-white focus:text-slate-900"
+                            />
+                        </div>
+
                         <select
                             value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
+                            onChange={(e) => {
+                                setSortBy(e.target.value);
+                                setPage(1);
+                            }}
                             className="rounded-2xl border border-white/20 bg-slate-800 px-4 py-3 text-sm font-medium text-white outline-none"
                         >
                             <option value="newest">Sort: Newest First</option>
@@ -166,11 +230,14 @@ function Home() {
                             <option value="name_asc">Alphabetical (A-Z)</option>
                         </select>
 
-                        <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-white/20 bg-slate-800 px-4 py-3 text-sm text-white">
+                        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/20 bg-slate-800 px-4 py-3 text-sm text-white">
                             <input
                                 type="checkbox"
                                 checked={inStockOnly}
-                                onChange={(e) => setInStockOnly(e.target.checked)}
+                                onChange={(e) => {
+                                    setInStockOnly(e.target.checked);
+                                    setPage(1);
+                                }}
                                 className="h-4 w-4 rounded accent-emerald-500"
                             />
                             <span>In Stock Only</span>
@@ -183,7 +250,10 @@ function Home() {
                     {productCategories.map((cat) => (
                         <button
                             key={cat}
-                            onClick={() => setSelectedCategory(cat)}
+                            onClick={() => {
+                                setSelectedCategory(cat);
+                                setPage(1);
+                            }}
                             className={`whitespace-nowrap rounded-full px-5 py-2 text-xs font-semibold tracking-wide transition ${
                                 selectedCategory === cat
                                     ? "bg-slate-900 text-white shadow"
@@ -196,9 +266,9 @@ function Home() {
                 </div>
 
                 {/* Active Search & Filter Indicator */}
-                {(searchQuery.trim() || selectedCategory !== "All" || inStockOnly) && (
-                    <div className="flex items-center justify-between rounded-2xl bg-white px-5 py-3 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200">
-                        <div className="flex items-center gap-2">
+                {(searchQuery.trim() || selectedCategory !== "All" || inStockOnly || minPrice !== "" || maxPrice !== "") && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-5 py-3 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200">
+                        <div className="flex flex-wrap items-center gap-2">
                             <span className="font-semibold text-slate-900">Active Filters:</span>
                             {searchQuery.trim() && (
                                 <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">
@@ -210,23 +280,42 @@ function Home() {
                                     Category: {selectedCategory}
                                 </span>
                             )}
+                            {(minPrice !== "" || maxPrice !== "") && (
+                                <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">
+                                    Price: ₹{minPrice || "0"} – {maxPrice ? `₹${maxPrice}` : "Any"}
+                                </span>
+                            )}
                             {inStockOnly && (
                                 <span className="rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 font-medium">
                                     In Stock
                                 </span>
                             )}
-                            <span className="text-slate-400">({products.length} matching)</span>
                         </div>
                         <button
                             onClick={() => {
                                 setSearchQuery("");
                                 setSelectedCategory("All");
+                                setMinPrice("");
+                                setMaxPrice("");
+                                setSortBy("newest");
                                 setInStockOnly(false);
+                                setPage(1);
                             }}
                             className="font-semibold text-red-600 hover:text-red-700"
                         >
                             Clear All
                         </button>
+                    </div>
+                )}
+
+                {/* Item Counter Summary */}
+                {!loading && pagination.totalProducts > 0 && (
+                    <div className="flex items-center justify-between px-1 text-xs font-medium text-slate-500">
+                        <span>
+                            Showing {((pagination.currentPage - 1) * pagination.pageSize) + 1}–
+                            {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalProducts)} of {pagination.totalProducts} products
+                        </span>
+                        <span>Page {pagination.currentPage} of {pagination.totalPages}</span>
                     </div>
                 )}
 
@@ -259,7 +348,11 @@ function Home() {
                             onClick={() => {
                                 setSearchQuery("");
                                 setSelectedCategory("All");
+                                setMinPrice("");
+                                setMaxPrice("");
+                                setSortBy("newest");
                                 setInStockOnly(false);
+                                setPage(1);
                             }}
                             className="mt-4 rounded-full bg-slate-900 px-5 py-2 text-xs font-medium text-white"
                         >
@@ -399,6 +492,58 @@ function Home() {
                                 </article>
                             );
                         })}
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {!loading && pagination.totalPages > 1 && (
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-4 pb-8">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPage((p) => Math.max(1, p - 1));
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            disabled={page <= 1 || loading}
+                            className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            ← Previous
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: pagination.totalPages }, (_, index) => {
+                                const pageNumber = index + 1;
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        type="button"
+                                        onClick={() => {
+                                            setPage(pageNumber);
+                                            window.scrollTo({ top: 0, behavior: "smooth" });
+                                        }}
+                                        className={`h-9 min-w-9 rounded-xl px-3 text-xs font-semibold transition ${
+                                            page === pageNumber
+                                                ? "bg-slate-900 text-white shadow-md"
+                                                : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+                                        }`}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPage((p) => Math.min(pagination.totalPages, p + 1));
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            disabled={page >= pagination.totalPages || loading}
+                            className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            Next →
+                        </button>
                     </div>
                 )}
             </div>
